@@ -46,7 +46,7 @@ func TestAddGetDelete(t *testing.T) {
 	// добавьте новую посылку в БД, убедитесь в отсутствии ошибки и наличии идентификатора
 	number, err := store.Add(parcel)
 	require.NoError(t, err)
-	require.Greater(t, number, parcel.Number)
+	require.NotEmpty(t, number)
 
 	// get
 	// получите только что добавленную посылку, убедитесь в отсутствии ошибки
@@ -59,9 +59,12 @@ func TestAddGetDelete(t *testing.T) {
 
 	// delete
 	// удалите добавленную посылку, убедитесь в отсутствии ошибки
-	// проверьте, что посылку больше нельзя получить из БД
 	err = store.Delete(number)
 	require.NoError(t, err)
+
+	// проверьте, что посылку больше нельзя получить из БД
+	_, err = store.Get(number)
+	require.ErrorIs(t, err, sql.ErrNoRows)
 }
 
 // TestSetAddress проверяет обновление адреса
@@ -157,7 +160,7 @@ func TestGetByClient(t *testing.T) {
 		// добавьте новую посылку в БД, убедитесь в отсутствии ошибки и наличии идентификатора
 		id, err := store.Add(parcels[i])
 		require.NoError(t, err)
-		require.Greater(t, id, 0)
+		require.NotEmpty(t, id)
 
 		// обновляем идентификатор добавленной у посылки
 		parcels[i].Number = id
